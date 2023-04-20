@@ -1,7 +1,11 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { EventsGateway } from "./events.gateway";
+import { TrackingModule } from "../modules/tracking/tracking.module";
+import { TrackingService } from "../services/tracking/tracking.service";
 
 @Module({
-  providers: [EventsGateway]
+  imports: [TrackingModule],
+  providers: [EventsGateway],
+  exports: [EventsGateway],
 })
 export class EventsModule {}

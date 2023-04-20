@@ -6,6 +6,7 @@ import {
   WebSocketServer
 } from "@nestjs/websockets";
 import {Server} from 'socket.io';
+import { TrackingService } from "../services/tracking/tracking.service";
 
 @WebSocketGateway({
   cors: {
@@ -15,6 +16,8 @@ import {Server} from 'socket.io';
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
+
+  constructor(private readonly trackingService: TrackingService) {}
 
   afterInit(server: Server) {
     console.log('WebSocket server initialized');
@@ -29,14 +32,13 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('message')
-  async getListTrackings() {
-    this.server.emit('message', [
-      {
-        active: true, title: 'Cool', date: new Date()
-      },
-      {
-        active: false, title: 'Cool2', date: new Date()
-      }
-    ])
+  public async getListTrackings(): Promise<void> {
+    const listTrackings = await this.trackingService.getTrackings({});
+
+    this.server.emit('message', listTrackings)
+  }
+
+  public emitEvent(eventName: string): void {
+    this.server.emit(eventName);
   }
 }
